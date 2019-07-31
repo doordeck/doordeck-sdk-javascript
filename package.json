@@ -1,0 +1,60 @@
+{
+  "_from": "file:doordeck-javascript-doordeck-sdk-1.1.0.tgz",
+  "_id": "@doordeck/javascript-doordeck-sdk@1.1.0",
+  "_inBundle": false,
+  "_integrity": "sha512-ruX9rzWfksscnX9LEfAzwpPONj1uax1CF4L0hZB89HKMKRj+ug3iwJsSAtdZxhMzwSi/9K3j2zbnzMvnNPewYw==",
+  "_location": "/@doordeck/javascript-doordeck-sdk",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "file",
+    "where": "/Users/Gregory/Documents/Doordeck/Vue/DoordeckOS",
+    "raw": "doordeck-javascript-doordeck-sdk-1.1.0.tgz",
+    "rawSpec": "doordeck-javascript-doordeck-sdk-1.1.0.tgz",
+    "saveSpec": "file:doordeck-javascript-doordeck-sdk-1.1.0.tgz",
+    "fetchSpec": "/Users/Gregory/Documents/Doordeck/Vue/DoordeckOS/doordeck-javascript-doordeck-sdk-1.1.0.tgz"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "/Users/Gregory/Documents/Doordeck/Vue/DoordeckOS/doordeck-javascript-doordeck-sdk-1.1.0.tgz",
+  "_shasum": "0e1024cd075940d7f7e18f0ee48025062b1d7e49",
+  "_spec": "doordeck-javascript-doordeck-sdk-1.1.0.tgz",
+  "_where": "/Users/Gregory/Documents/Doordeck/Vue/DoordeckOS",
+  "author": {
+    "name": "doordeck",
+    "email": "development@doordeck.com"
+  },
+  "bugs": {
+    "url": "https://github.com/doordeck/doordeck-sdk-javascript/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "axios": "^0.19.0",
+    "jsrsasign": "^8.0.12",
+    "libsodium-wrappers": "^0.7.5"
+  },
+  "deprecated": false,
+  "description": "Javascript wrapper for the Doordeck SDK.",
+  "homepage": "https://doordeck.com",
+  "keywords": [
+    "doordeck",
+    "sdk",
+    "javascript",
+    "access control"
+  ],
+  "license": "Apache-2.0",
+  "licenseFilename": "LICENSE",
+  "main": "index.js",
+  "name": "@doordeck/javascript-doordeck-sdk",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/doordeck/doordeck-sdk-javascript.git",
+    "baseUrl": "https://github.com/doordeck/doordeck-sdk-javascript"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "title": "Javascript Doordeck Sdk",
+  "version": "1.1.0"
+}
