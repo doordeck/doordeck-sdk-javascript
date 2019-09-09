@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import axios from 'axios'
 import { BASE_URL, CERT } from '../constants'
 import ephemaralKeyGenerator from './ephemeralKeyGenerator'
 import doordeck from '../doordeck'
@@ -30,40 +30,42 @@ var signer = function (deviceId, operation) {
 
 var executor = function (deviceId, operation) {
   var signature = signer(deviceId, operation)
-  return Vue.http.post(baseUrl + '/device/' + deviceId + '/execute', signature,
+  return axios.post(baseUrl + '/device/' + deviceId + '/execute', signature,
     {
       skipAuthorization: true,
       headers: {
-        'Authorization': 'Bearer ' + localStorage.token
-      }
+        'Authorization': 'Bearer ' + localStorage.token,
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000
     }
   )
 }
-// var getUserByEmail = function (userEmail) {
-//   return Vue.http.post(baseUrl + '/share/invite/' + userEmail, null, {
-//     skipAuthorization: true,
-//     headers: {
-//       'Authorization': 'Bearer ' + localStorage.token
-//     }
-//   }).then(response => {
-//     return response
-//   })
-// }
-var getUserByEmail = function (email) {
-  return Vue.http.post(baseUrl + '/directory/query', {'email': email}, {
-    skipAuthorization: true,
+var getDoordeckUserByEmail = function (userEmail) {
+  return axios.post(baseUrl + '/share/invite/' + userEmail, null, {
     headers: {
-      'Authorization': 'Bearer ' + localStorage.token
+      'Authorization': 'Bearer ' + localStorage.token,
+      'Content-Type': 'application/json'
+    }
+  }).then(response => {
+    return response
+  })
+}
+var getUserByEmail = function (email) {
+  return axios.post(baseUrl + '/directory/query', {'email': email}, {
+    headers: {
+      'Authorization': 'Bearer ' + localStorage.token,
+      'Content-Type': 'application/json'
     }
   }).then(response => {
     return response
   })
 }
 var getUserById = function (id) {
-  return Vue.http.post(baseUrl + '/directory/query', {'localKey': id}, {
-    skipAuthorization: true,
+  return axios.post(baseUrl + '/directory/query', {'localKey': id}, {
     headers: {
-      'Authorization': 'Bearer ' + localStorage.token
+      'Authorization': 'Bearer ' + localStorage.token,
+      'Content-Type': 'application/json'
     }
   }).then(response => {
     return response
@@ -76,11 +78,11 @@ export default {
       locked: true
     })
   },
-  unlock (deviceId, duration) {
+  unlock (deviceId) {
     return executor(deviceId, {
       type: 'MUTATE_LOCK',
       locked: false,
-      duration: duration
+      duration: 7
     })
   },
   changeOpenHours (deviceId, settings) {
@@ -120,6 +122,25 @@ export default {
       }
     }
   },
+  getDoordeckUser (user) {
+    var emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    if (emailRegex.test(user)) {
+      return getDoordeckUserByEmail(user).then(response => {
+        var data = {'user': response.data, 'email': user}
+        response.data = data
+        return response
+      })
+    } else {
+      var uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+      if (uuidRegex.test(user)) {
+        return getUserById(user).then(response => {
+          var data = {'user': response.data, 'email': user}
+          response.data = data
+          return response
+        })
+      }
+    }
+  },
   share (deviceId, user, role, start, end) {
     if (start == null && end == null) {
       return executor(deviceId, {
@@ -132,6 +153,11 @@ export default {
         share.id = deviceId
         share.email = user.email
         response.data = share
+        return response
+      }, fail => {
+        var share = {}
+        share.id = deviceId
+        share.email = user.email
         return response
       })
     } else {
@@ -147,6 +173,11 @@ export default {
         share.id = deviceId
         share.email = user.email
         response.data = share
+        return response
+      }, fail => {
+        var share = {}
+        share.id = deviceId
+        share.email = user.email
         return response
       })
     }
@@ -166,26 +197,26 @@ export default {
     })
   },
   getLockFromTile (tileId) {
-    return Vue.http.get(baseUrl + '/tile/' + tileId, {
-      skipAuthorization: true,
+    return axios.get(baseUrl + '/tile/' + tileId, {
       headers: {
-        'Authorization': 'Bearer ' + localStorage.token
+        'Authorization': 'Bearer ' + localStorage.token,
+        'Content-Type': 'application/json'
       }
     })
   },
   link (deviceId, tileId) {
-    return Vue.http.put(baseUrl + '/device/' + deviceId + '/tile/' + tileId, null, {
-      skipAuthorization: true,
+    return axios.put(baseUrl + '/device/' + deviceId + '/tile/' + tileId, null, {
       headers: {
-        'Authorization': 'Bearer ' + localStorage.token
+        'Authorization': 'Bearer ' + localStorage.token,
+        'Content-Type': 'application/json'
       }
     })
   },
   delink (deviceId, tileId) {
-    return Vue.http.delete(baseUrl + '/device/' + deviceId + '/tile/' + tileId, {
-      skipAuthorization: true,
+    return axios.delete(baseUrl + '/device/' + deviceId + '/tile/' + tileId, {
       headers: {
-        'Authorization': 'Bearer ' + localStorage.token
+        'Authorization': 'Bearer ' + localStorage.token,
+        'Content-Type': 'application/json'
       }
     })
   }

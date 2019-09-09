@@ -18,7 +18,6 @@ const doordeckInit = function (authToken) {
   return new Promise (function(resolve, reject) {
     libSodium.ready.then(function () {
       if (isLoaded()) resolve({state: 'success', message: 'Doordeck is already initialised.'})
-      console.log(authToken)
       if (authToken !== null && authToken !== undefined) {
         storeAuthToken(authToken)
         ephemaralKeyGenerator.generateKeys().then(keys => {
