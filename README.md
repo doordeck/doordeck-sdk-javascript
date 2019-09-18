@@ -47,4 +47,4 @@ doordeckSdk.device.getUser(userEmailorId).then(response => {
 
 ## Documentation
 
-	https://doordeck.com/developer
+https://doordeck.com/developer
