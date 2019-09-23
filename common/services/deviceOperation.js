@@ -41,8 +41,8 @@ var executor = function (deviceId, operation) {
     }
   )
 }
-var getDoordeckUserByEmail = function (userEmail) {
-  return axios.post(baseUrl + '/share/invite/' + userEmail, null, {
+var getDoordeckUserByEmail = function (userEmail, visitor) {
+  return axios.post(baseUrl + '/share/invite/' + userEmail + '?visitor=' + visitor, null, {
     headers: {
       'Authorization': 'Bearer ' + localStorage.token,
       'Content-Type': 'application/json'
@@ -78,11 +78,11 @@ export default {
       locked: true
     })
   },
-  unlock (deviceId) {
+  unlock (deviceId, duration) {
     return executor(deviceId, {
       type: 'MUTATE_LOCK',
       locked: false,
-      duration: 7
+      duration: duration
     })
   },
   changeOpenHours (deviceId, settings) {
@@ -122,10 +122,10 @@ export default {
       }
     }
   },
-  getDoordeckUser (user) {
+  getDoordeckUser (user, visitor) {
     var emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     if (emailRegex.test(user)) {
-      return getDoordeckUserByEmail(user).then(response => {
+      return getDoordeckUserByEmail(user, visitor).then(response => {
         var data = {'user': response.data, 'email': user}
         response.data = data
         return response
