@@ -17,7 +17,6 @@ const retrieveSavedKeys = function () {
 
 export default {
   generateKeys () { return new Promise(function(resolve, reject) {
-      console.log("test")
       if (retrieveSavedKeys() !== null) {
         let keys = retrieveSavedKeys()
         resolve(keys)
