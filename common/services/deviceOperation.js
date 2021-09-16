@@ -7,7 +7,7 @@ var baseUrl = BASE_URL
 
 var signer = function (deviceId, operation) {
   var privateKey = ephemaralKeyGenerator.retrieveSavedKeys().privateKey
-    
+
   // Header
   var oHeader = {alg: 'EdDSA', typ: 'JWT', x5c: JSON.parse(localStorage[CERT]).certificateChain}
   // Payload
@@ -199,6 +199,7 @@ export default {
   getLockFromTile (tileId) {
     return axios.get(baseUrl + '/tile/' + tileId, {
       headers: {
+        'Accept': 'application/vnd.doordeck.api-v3+json',
         'Authorization': 'Bearer ' + localStorage.token,
         'Content-Type': 'application/json'
       }
