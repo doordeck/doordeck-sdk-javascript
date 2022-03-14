@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { BASE_URL, CERT } from '../constants'
+import { BASE_URL, CERT, AUTH_TOKEN } from '../constants'
 import ephemaralKeyGenerator from './ephemeralKeyGenerator'
 import doordeck from '../doordeck'
 
@@ -34,8 +34,8 @@ var executor = function (deviceId, operation) {
     {
       skipAuthorization: true,
       headers: {
-        'Authorization': 'Bearer ' + localStorage.token,
-        'Content-Type': 'application/json'
+        'Authorization': 'Bearer ' + localStorage[AUTH_TOKEN],
+        'Content-Type': 'application/jwt'
       },
       timeout: 10000
     }
@@ -44,7 +44,7 @@ var executor = function (deviceId, operation) {
 var getDoordeckUserByEmail = function (userEmail, visitor) {
   return axios.post(baseUrl + '/share/invite/' + userEmail + '?visitor=' + visitor, null, {
     headers: {
-      'Authorization': 'Bearer ' + localStorage.token,
+      'Authorization': 'Bearer ' + localStorage[AUTH_TOKEN],
       'Content-Type': 'application/json'
     }
   }).then(response => {
@@ -54,7 +54,7 @@ var getDoordeckUserByEmail = function (userEmail, visitor) {
 var getUserByEmail = function (email) {
   return axios.post(baseUrl + '/directory/query', {'email': email}, {
     headers: {
-      'Authorization': 'Bearer ' + localStorage.token,
+      'Authorization': 'Bearer ' + localStorage[AUTH_TOKEN],
       'Content-Type': 'application/json'
     }
   }).then(response => {
@@ -64,7 +64,7 @@ var getUserByEmail = function (email) {
 var getUserById = function (id) {
   return axios.post(baseUrl + '/directory/query', {'localKey': id}, {
     headers: {
-      'Authorization': 'Bearer ' + localStorage.token,
+      'Authorization': 'Bearer ' + localStorage[AUTH_TOKEN],
       'Content-Type': 'application/json'
     }
   }).then(response => {
@@ -200,7 +200,7 @@ export default {
     return axios.get(baseUrl + '/tile/' + tileId, {
       headers: {
         'Accept': 'application/vnd.doordeck.api-v3+json',
-        'Authorization': 'Bearer ' + localStorage.token,
+        'Authorization': 'Bearer ' + localStorage[AUTH_TOKEN],
         'Content-Type': 'application/json'
       }
     })
@@ -208,7 +208,7 @@ export default {
   link (deviceId, tileId) {
     return axios.put(baseUrl + '/device/' + deviceId + '/tile/' + tileId, null, {
       headers: {
-        'Authorization': 'Bearer ' + localStorage.token,
+        'Authorization': 'Bearer ' + localStorage[AUTH_TOKEN],
         'Content-Type': 'application/json'
       }
     })
@@ -216,7 +216,7 @@ export default {
   delink (deviceId, tileId) {
     return axios.delete(baseUrl + '/device/' + deviceId + '/tile/' + tileId, {
       headers: {
-        'Authorization': 'Bearer ' + localStorage.token,
+        'Authorization': 'Bearer ' + localStorage[AUTH_TOKEN],
         'Content-Type': 'application/json'
       }
     })
