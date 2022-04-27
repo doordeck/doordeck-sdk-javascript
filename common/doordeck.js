@@ -17,17 +17,23 @@ const isLoaded = function (authToken) {
 const doordeckInit = function (authToken) {
   return new Promise (function(resolve, reject) {
     libSodium.ready.then(function () {
-      if (isLoaded(authToken)) resolve({state: 'success', message: 'Doordeck is already initialised.'})
-      if (authToken !== null && authToken !== undefined) {
-        storeAuthToken(authToken)
-        ephemaralKeyGenerator.generateKeys().then(keys => {
-          certificate.getCertificate(keys).then(response => {
-            resolve(response)
-          }, fail => {
-            reject(fail)
+      if (isLoaded(authToken)) {
+        resolve({state: 'success', message: 'Doordeck is already initialised.'});
+      } else {
+        if (authToken !== null && authToken !== undefined) {
+          storeAuthToken(authToken)
+          certificate.resetCert();
+          ephemaralKeyGenerator.generateKeys().then(keys => {
+            certificate.getCertificate(keys).then(response => {
+              resolve(response)
+            }, fail => {
+              reject(fail)
+            })
           })
-        })
-      } else reject({state: 'error', message: 'No Auth Token provided.'})
+        } else {
+          reject({state: 'error', message: 'No Auth Token provided.'});
+        }
+      }
     })
   })
 }

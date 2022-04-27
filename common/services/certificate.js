@@ -9,6 +9,9 @@ const retrieveSavedCert = function () {
 const storeCert = function (cert) {
   localStorage[CERT] = JSON.stringify(cert)
 }
+const resetCert = function () {
+  localStorage[CERT] = null;
+}
 const registerCertificate = function (pubKey) {
   var ephKey = doordeck.libSodium.to_base64(pubKey, doordeck.libSodium.base64_variants.ORIGINAL)
   return axios.post(BASE_URL + '/auth/certificate', {
@@ -74,5 +77,6 @@ export default {
       })
     })
   },
-  retrieveSavedCert
+  retrieveSavedCert,
+  resetCert
 }
