@@ -1,4 +1,4 @@
-import { AUTH_TOKEN } from './constants'
+import { AUTH_TOKEN, EPHEMERAL_PUBKEY, EPHEMERAL_PRIKEY, CERT } from './constants'
 import ephemaralKeyGenerator from './services/ephemeralKeyGenerator'
 import certificate from './services/certificate'
 import libSodium from 'libsodium-wrappers'
@@ -14,7 +14,10 @@ const isLoaded = function (authToken) {
   } else return false
 }
 
-const doordeckInit = function (authToken) {
+const doordeckInit = function (authToken, reset = false) {
+  if (reset) {
+    doordeckReset();
+  }
   return new Promise (function(resolve, reject) {
     libSodium.ready.then(function () {
       if (isLoaded(authToken)) {
@@ -70,9 +73,15 @@ const getStoredAuthToken = function () {
   return localStorage[AUTH_TOKEN]
 }
 
-
 const verifyCode = function (code) {
   return certificate.verifyCode(code, ephemaralKeyGenerator.retrieveSavedKeys())
+}
+
+const doordeckReset = function () {
+    localStorage.removeItem(AUTH_TOKEN);
+    localStorage.removeItem(CERT);
+    localStorage.removeItem(EPHEMERAL_PRIKEY);
+    localStorage.removeItem(EPHEMERAL_PUBKEY);
 }
 
 export default {

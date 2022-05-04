@@ -56,6 +56,12 @@ export default {
               if (response.data.method !== undefined && response.data.method !== null) {
                 reject({state: 'verify', method: response.data.method})
               } else reject({state: 'error', message: 'Failed to send 2FA request'})
+            }, fail => {
+              if (fail.response.status === 429) {
+                reject({state: 'error', message: 'Too many current pending verifications', code: 429});
+              } else {
+                reject({state: 'error', message: 'Failed to send 2FA request'});
+              }
             })
           } else {
             reject({state: 'error', message: 'Failed to get certificate'})
