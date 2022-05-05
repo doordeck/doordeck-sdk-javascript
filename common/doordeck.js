@@ -1,4 +1,4 @@
-import { AUTH_TOKEN } from './constants'
+import { AUTH_TOKEN, EPHEMERAL_PUBKEY, EPHEMERAL_PRIKEY, CERT } from './constants'
 import ephemaralKeyGenerator from './services/ephemeralKeyGenerator'
 import certificate from './services/certificate'
 import libSodium from 'libsodium-wrappers'
@@ -14,20 +14,29 @@ const isLoaded = function (authToken) {
   } else return false
 }
 
-const doordeckInit = function (authToken) {
+const doordeckInit = function (authToken, reset = false) {
+  if (reset) {
+    doordeckReset();
+  }
   return new Promise (function(resolve, reject) {
     libSodium.ready.then(function () {
-      if (isLoaded()) resolve({state: 'success', message: 'Doordeck is already initialised.'})
-      if (authToken !== null && authToken !== undefined) {
-        storeAuthToken(authToken)
-        ephemaralKeyGenerator.generateKeys().then(keys => {
-          certificate.getCertificate(keys).then(response => {
-            resolve(response)
-          }, fail => {
-            reject(fail)
+      if (isLoaded(authToken)) {
+        resolve({state: 'success', message: 'Doordeck is already initialised.'});
+      } else {
+        if (authToken !== null && authToken !== undefined) {
+          storeAuthToken(authToken)
+          certificate.resetCert();
+          ephemaralKeyGenerator.generateKeys().then(keys => {
+            certificate.getCertificate(keys).then(response => {
+              resolve(response)
+            }, fail => {
+              reject(fail)
+            })
           })
-        })
-      } else reject({state: 'error', message: 'No Auth Token provided.'})
+        } else {
+          reject({state: 'error', message: 'No Auth Token provided.'});
+        }
+      }
     })
   })
 }
@@ -64,9 +73,15 @@ const getStoredAuthToken = function () {
   return localStorage[AUTH_TOKEN]
 }
 
-
 const verifyCode = function (code) {
   return certificate.verifyCode(code, ephemaralKeyGenerator.retrieveSavedKeys())
+}
+
+const doordeckReset = function () {
+    localStorage.removeItem(AUTH_TOKEN);
+    localStorage.removeItem(CERT);
+    localStorage.removeItem(EPHEMERAL_PRIKEY);
+    localStorage.removeItem(EPHEMERAL_PUBKEY);
 }
 
 export default {

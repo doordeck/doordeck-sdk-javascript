@@ -9,6 +9,9 @@ const retrieveSavedCert = function () {
 const storeCert = function (cert) {
   localStorage[CERT] = JSON.stringify(cert)
 }
+const resetCert = function () {
+  localStorage[CERT] = null;
+}
 const registerCertificate = function (pubKey) {
   var ephKey = doordeck.libSodium.to_base64(pubKey, doordeck.libSodium.base64_variants.ORIGINAL)
   return axios.post(BASE_URL + '/auth/certificate', {
@@ -53,6 +56,12 @@ export default {
               if (response.data.method !== undefined && response.data.method !== null) {
                 reject({state: 'verify', method: response.data.method})
               } else reject({state: 'error', message: 'Failed to send 2FA request'})
+            }, fail => {
+              if (fail.response.status === 429) {
+                reject({state: 'error', message: 'Too many current pending verifications', code: 429});
+              } else {
+                reject({state: 'error', message: 'Failed to send 2FA request'});
+              }
             })
           } else {
             reject({state: 'error', message: 'Failed to get certificate'})
@@ -74,5 +83,6 @@ export default {
       })
     })
   },
-  retrieveSavedCert
+  retrieveSavedCert,
+  resetCert
 }
