@@ -25,7 +25,7 @@ async function getAll() {
 
 }
 export async function del(key) {
-  return (await dbPromise).delete(databaseObjectKey, key);
+    return (await dbPromise).delete(databaseObjectKey, key);
 }
 
 export async function deleteDatabase() {

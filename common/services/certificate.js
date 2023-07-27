@@ -1,7 +1,8 @@
-import axios from 'axios'
 import { AUTH_TOKEN, BASE_URL, CERT } from '../constants'
-import doordeck from '../doordeck'
+
 import IDB from '../idb'
+import axios from 'axios'
+import doordeck from '../doordeck'
 
 const retrieveSavedCert = async function () {
   const email = localStorage.email;
@@ -19,6 +20,11 @@ const storeCert = function (cert) {
   const email = localStorage.email;
   IDB.set(email, cert)
 }
+
+const deleteCert = async function() {
+  await IDB.deleteDatabase();
+}
+
 const registerCertificate = function (pubKey) {
   var ephKey = doordeck.libSodium.to_base64(pubKey, doordeck.libSodium.base64_variants.ORIGINAL)
   return axios.post(BASE_URL + '/auth/certificate', {
