@@ -11,9 +11,10 @@
   "bugs": {
     "url": "https://github.com/doordeck/doordeck-sdk-javascript/issues"
   },
-  "bundleDependencies": false,
+  "bundleDependencies": [],
   "dependencies": {
     "axios": "^0.21",
+    "idb": "^7.1.1",
     "jsrsasign": "^10.1",
     "libsodium-wrappers": "^0.7"
   },

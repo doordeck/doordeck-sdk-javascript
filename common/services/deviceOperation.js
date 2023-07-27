@@ -30,16 +30,20 @@ var signer = function (deviceId, operation) {
 
 var executor = function (deviceId, operation) {
   var signature = signer(deviceId, operation)
-  return axios.post(baseUrl + '/device/' + deviceId + '/execute', signature,
-    {
-      skipAuthorization: true,
-      headers: {
-        'Authorization': 'Bearer ' + localStorage.token,
-        'Content-Type': 'application/json'
-      },
-      timeout: 10000
-    }
-  )
+  return axios({
+    url: baseUrl + '/device/' + deviceId + '/execute',
+    method: "POST",
+    data: signature,
+    skipAuthorization: true,
+    transformRequest: [
+      function (data, headers) { return data},
+    ],
+    headers: {
+      'Authorization': 'Bearer ' + localStorage.token,
+      'Content-Type': 'application/json'
+    },
+    timeout: 10000
+  })
 }
 var getDoordeckUserByEmail = function (userEmail, visitor) {
   return axios.post(baseUrl + '/share/invite/' + userEmail + '?visitor=' + visitor, null, {
@@ -154,11 +158,12 @@ export default {
         share.email = user.email
         response.data = share
         return response
-      }, fail => {
+      })
+      .catch(fail => {
         var share = {}
         share.id = deviceId
         share.email = user.email
-        return response
+        return fail
       })
     } else {
       return executor(deviceId, {
@@ -178,7 +183,7 @@ export default {
         var share = {}
         share.id = deviceId
         share.email = user.email
-        return response
+        return fail
       })
     }
   },
