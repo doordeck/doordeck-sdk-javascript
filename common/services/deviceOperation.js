@@ -5,7 +5,7 @@ import { CERT } from "../constants";
 import ephemaralKeyGenerator from "./ephemeralKeyGenerator";
 import doordeckSDK from "../doordeck";
 
-const signer = function (deviceId, operation) {
+const _signer = function (deviceId, operation) {
   // Retrieve the EdDSA private key from storage
   const privateKey = ephemaralKeyGenerator.retrieveSavedKeys().privateKey
 
@@ -47,9 +47,8 @@ const signer = function (deviceId, operation) {
       doordeckSDK.libSodium.base64_variants.URLSAFE_NO_PADDING,
   )
 };
-
-const executor = function (baseUrl, deviceId, operation) {
-  const signature = signer(deviceId, operation);
+const _executor = function (baseUrl, deviceId, operation) {
+  const signature = _signer(deviceId, operation);
   return axios({
     url: baseUrl + "/device/" + deviceId + "/execute",
     method: "POST",
@@ -67,7 +66,7 @@ const executor = function (baseUrl, deviceId, operation) {
     timeout: 10000,
   });
 };
-const getUserByEmail = function (baseUrl, userEmail) {
+const _getUserByEmail = function (baseUrl, userEmail) {
   return axios
       .post(baseUrl + "/share/invite/" + userEmail, null, {
         skipAuthorization: true,
@@ -79,7 +78,7 @@ const getUserByEmail = function (baseUrl, userEmail) {
         return response;
       });
 };
-const getUserById = function (baseUrl, id) {
+const _getUserById = function (baseUrl, id) {
   return axios
       .post(
           baseUrl + "/directory/query",
@@ -97,32 +96,32 @@ const getUserById = function (baseUrl, id) {
 };
 export default {
   lock(baseUrl, deviceId) {
-    return executor(baseUrl, deviceId, {
+    return _executor(baseUrl, deviceId, {
       type: "MUTATE_LOCK",
       locked: true,
     });
   },
   unlock(baseUrl, deviceId, duration) {
-    return executor(baseUrl, deviceId, {
+    return _executor(baseUrl, deviceId, {
       type: "MUTATE_LOCK",
       locked: false,
       duration: duration,
     });
   },
   changeOpenHours(baseUrl, deviceId, settings) {
-    return executor(baseUrl, deviceId, {
+    return _executor(baseUrl, deviceId, {
       type: "MUTATE_SETTING",
       unlockBetween: settings,
     });
   },
   changeUnlockTime(baseUrl, deviceId, time) {
-    return executor(baseUrl, deviceId, {
+    return _executor(baseUrl, deviceId, {
       type: "MUTATE_SETTING",
       unlockDuration: parseInt(time),
     });
   },
   remove(baseUrl, deviceId, users) {
-    return executor(baseUrl, deviceId, {
+    return _executor(baseUrl, deviceId, {
       type: "REMOVE_USER",
       users: users,
     });
@@ -132,7 +131,7 @@ export default {
     const emailRegex =
         /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     if (emailRegex.test(user)) {
-      return getUserByEmail(user).then((response) => {
+      return _getUserByEmail(user).then((response) => {
         response.data = { user: response.data, email: user };
         return response;
       });
@@ -140,7 +139,7 @@ export default {
       const uuidRegex =
           /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
       if (uuidRegex.test(user)) {
-        return getUserById(baseUrl, user).then((response) => {
+        return _getUserById(baseUrl, user).then((response) => {
           response.data = { user: response.data, email: user };
           return response;
         });
@@ -149,7 +148,7 @@ export default {
   },
   share(baseUrl, deviceId, user, role, start, end) {
     if (start == null && end == null) {
-      return executor(baseUrl, deviceId, {
+      return _executor(baseUrl, deviceId, {
         type: "ADD_USER",
         publicKey: user.publicKey,
         user: user.userId,
@@ -162,7 +161,7 @@ export default {
         return response;
       });
     } else {
-      return executor(baseUrl, deviceId, {
+      return _executor(baseUrl, deviceId, {
         type: "ADD_USER",
         publicKey: user.publicKey,
         user: user.userId,
@@ -179,7 +178,7 @@ export default {
     }
   },
   changeRole(baseUrl, deviceId, user, role) {
-    return executor(baseUrl, deviceId, {
+    return _executor(baseUrl, deviceId, {
       type: "ADD_USER",
       publicKey: user.publicKey,
       user: user.userId,
