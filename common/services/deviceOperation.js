@@ -1,39 +1,53 @@
 // noinspection JSUnusedGlobalSymbols,JSCheckFunctionSignatures
 
 import axios from "axios";
-import jwtDecode from "jwt-decode";
-import KJUR from "jsrsasign";
+import { CERT } from "../constants";
+import ephemaralKeyGenerator from "./ephemeralKeyGenerator";
+import doordeckSDK from "../doordeck";
 
 const signer = function (deviceId, operation) {
-  const privateKeyHex = KJUR.b64utohex(localStorage.privateKey);
-  const privateKey = KJUR.KEYUTIL.getKeyFromPlainPrivatePKCS8Hex(privateKeyHex);
+  // Retrieve the EdDSA private key from storage
+  const privateKey = ephemaralKeyGenerator.retrieveSavedKeys().privateKey
+
   // Header
-  const oHeader = {alg: "RS256", typ: "JWT"};
+  // noinspection JSUnresolvedVariable
+  const oHeader = {
+    alg: "EdDSA",
+    typ: "JWT",
+    x5c: JSON.parse(localStorage[CERT]).certificateChain,
+  };
+
   // Payload
-  const tNow = KJUR.jws.IntDate.get("now");
-  const tEnd = tNow + 60;
+  const tNow = Math.floor(Date.now() / 1000)
+  const tEnd = tNow + 60
   const oPayload = {
-    iss: jwtDecode(localStorage.token).sub,
+    iss: JSON.parse(localStorage[CERT]).userId,
     sub: deviceId,
     nbf: tNow,
     iat: tNow,
     exp: tEnd,
-    operation: operation,
-  };
-  const sHeader = JSON.stringify(oHeader);
-  const sPayload = JSON.stringify(oPayload);
-  return KJUR.jws.JWS.sign(oHeader.alg, sHeader, sPayload, privateKey);
+    operation: operation
+  }
+  // noinspection JSUnresolvedVariable,JSUnresolvedFunction
+  const sHeader = doordeckSDK.libSodium.to_base64(JSON.stringify(oHeader), doordeckSDK.libSodium.base64_variants.ORIGINAL)
+  // noinspection JSUnresolvedVariable,JSUnresolvedFunction
+  const sPayload = doordeckSDK.libSodium.to_base64(JSON.stringify(oPayload), doordeckSDK.libSodium.base64_variants.ORIGINAL)
+  const message = sHeader + '.' + sPayload
+  // noinspection JSUnresolvedVariable,JSUnresolvedFunction
+  const signature = doordeckSDK.libSodium.crypto_sign_detached(message, privateKey)
+  // noinspection JSUnresolvedVariable,JSUnresolvedFunction
+  return message + '.' + doordeckSDK.libSodium.to_base64(signature, doordeckSDK.libSodium.base64_variants.ORIGINAL)
 };
 
 const executor = function (baseUrl, deviceId, operation) {
   const signature = signer(deviceId, operation);
   return axios({
-    url: baseUrl + deviceId + "/execute",
+    url: baseUrl + "/device/" + deviceId + "/execute",
     method: "POST",
     data: signature,
     skipAuthorization: true,
     transformRequest: [
-      function (data, _) {
+      function (data) {
         return data;
       },
     ],
@@ -104,12 +118,13 @@ export default {
       users: users,
     });
   },
+  /* eslint-disable */
   getUser(baseUrl, user) {
     const emailRegex =
         /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     if (emailRegex.test(user)) {
       return getUserByEmail(user).then((response) => {
-        response.data = {user: response.data, email: user};
+        response.data = { user: response.data, email: user };
         return response;
       });
     } else {
@@ -117,7 +132,7 @@ export default {
           /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
       if (uuidRegex.test(user)) {
         return getUserById(baseUrl, user).then((response) => {
-          response.data = {user: response.data, email: user};
+          response.data = { user: response.data, email: user };
           return response;
         });
       }
@@ -196,14 +211,11 @@ export default {
     );
   },
   delink(baseUrl, deviceId, tileId) {
-    return axios.delete(
-        baseUrl + "/device/" + deviceId + "/tile/" + tileId,
-        {
-          skipAuthorization: true,
-          headers: {
-            Authorization: "Bearer " + localStorage.token,
-          },
-        }
-    );
+    return axios.delete(baseUrl + "/device/" + deviceId + "/tile/" + tileId, {
+      skipAuthorization: true,
+      headers: {
+        Authorization: "Bearer " + localStorage.token,
+      },
+    });
   },
 };

@@ -2,7 +2,7 @@ import { AUTH_TOKEN } from './constants'
 import ephemaralKeyGenerator from './services/ephemeralKeyGenerator'
 import certificate from './services/certificate'
 import libSodium from 'libsodium-wrappers'
-import deviceOperation from "./services/deviceOperation";
+import device from "./services/deviceOperation";
 
 const isLoaded = async function (authToken) {
   if (authToken === getStoredAuthToken()) {
