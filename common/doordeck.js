@@ -2,14 +2,12 @@ import { AUTH_TOKEN } from './constants'
 import ephemaralKeyGenerator from './services/ephemeralKeyGenerator'
 import certificate from './services/certificate'
 import libSodium from 'libsodium-wrappers'
-import device from './services/deviceOperation'
+import deviceOperation from "./services/deviceOperation";
 
 const isLoaded = async function (authToken) {
   if (authToken === getStoredAuthToken()) {
     if (ephemaralKeyGenerator.retrieveSavedKeys() !== null) {
-      if ((await certificate.retrieveSavedCert()) !== null) {
-        return true
-      } else return false
+      return (await certificate.retrieveSavedCert()) !== null;
     } else return false
   } else return false
 }
@@ -32,10 +30,10 @@ const doordeckInit = function (authToken) {
   })
 }
 
-const unlock = function (deviceId) {
+const unlock = function (baseUrl, deviceId) {
   return new Promise (function (resolve, reject) {
     libSodium.ready.then(function () {
-      deviceOperation.unlock(deviceId, 7).then(response => {
+      deviceOperation.unlock(baseUrl, deviceId, 7).then(response => {
         resolve({state: 'succces', message: 'Door is unlocked.'})
       }, fail => {
         reject({state: 'error', message: 'No Auth Token provided.'})
@@ -44,10 +42,10 @@ const unlock = function (deviceId) {
   })
 }
 
-const share = function (deviceId, user, role, start, end) {
+const share = function (baseUrl, deviceId, user, role, start, end) {
   return new Promise (function (resolve, reject) {
     libSodium.ready.then(function () {
-      deviceOperation.share(deviceId, user, role, start, end).then(response => {
+      deviceOperation.share(baseUrl, deviceId, user, role, start, end).then(response => {
         resolve({state: 'succces', message: 'Door is unlocked.'})
       }, fail => {
         reject({state: 'error', message: 'No Auth Token provided.'})
