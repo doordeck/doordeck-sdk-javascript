@@ -49,22 +49,20 @@ const _signer = function (deviceId, operation) {
 };
 const _executor = function (baseUrl, deviceId, operation) {
   const signature = _signer(deviceId, operation);
-  return axios({
-    url: baseUrl + "/device/" + deviceId + "/execute",
-    method: "POST",
-    data: signature,
-    skipAuthorization: true,
-    transformRequest: [
-      function (data) {
-        return data;
-      },
-    ],
-    headers: {
-      Authorization: "Bearer " + localStorage.token,
-      "Content-Type": "application/json",
-    },
-    timeout: 10000,
-  });
+  return axios.post(
+      baseUrl + "/device/" + deviceId + "/execute",
+      signature,
+      {
+        headers: {
+          Authorization: "Bearer " + localStorage.token,
+          "Content-Type": "application/json",
+        },
+        transformRequest: [
+          (data) => data // Somehow this has to be like that, otherwise the default transformation does its own job
+        ],
+        timeout: 10000
+      }
+  );
 };
 const _getUserByEmail = function (baseUrl, userEmail) {
   return axios
