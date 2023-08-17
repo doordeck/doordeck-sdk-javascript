@@ -30,30 +30,6 @@ const doordeckInit = function (authToken) {
   })
 }
 
-const unlock = function (baseUrl, deviceId) {
-  return new Promise (function (resolve, reject) {
-    libSodium.ready.then(function () {
-      deviceOperation.unlock(baseUrl, deviceId, 7).then(response => {
-        resolve({state: 'succces', message: 'Door is unlocked.'})
-      }, fail => {
-        reject({state: 'error', message: 'No Auth Token provided.'})
-      })
-    })
-  })
-}
-
-const share = function (baseUrl, deviceId, user, role, start, end) {
-  return new Promise (function (resolve, reject) {
-    libSodium.ready.then(function () {
-      deviceOperation.share(baseUrl, deviceId, user, role, start, end).then(response => {
-        resolve({state: 'succces', message: 'Door is unlocked.'})
-      }, fail => {
-        reject({state: 'error', message: 'No Auth Token provided.'})
-      })
-    })
-  })
-}
-
 const storeAuthToken = function (authToken) {
   localStorage[AUTH_TOKEN] = authToken
 }
