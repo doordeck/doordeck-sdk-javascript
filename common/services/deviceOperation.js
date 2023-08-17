@@ -29,14 +29,23 @@ const signer = function (deviceId, operation) {
     operation: operation
   }
   // noinspection JSUnresolvedVariable,JSUnresolvedFunction
-  const sHeader = doordeckSDK.libSodium.to_base64(JSON.stringify(oHeader), doordeckSDK.libSodium.base64_variants.ORIGINAL)
+  const sHeader = doordeckSDK.libSodium.to_base64(
+      JSON.stringify(oHeader),
+      doordeckSDK.libSodium.base64_variants.URLSAFE_NO_PADDING,
+  )
   // noinspection JSUnresolvedVariable,JSUnresolvedFunction
-  const sPayload = doordeckSDK.libSodium.to_base64(JSON.stringify(oPayload), doordeckSDK.libSodium.base64_variants.ORIGINAL)
+  const sPayload = doordeckSDK.libSodium.to_base64(
+      JSON.stringify(oPayload),
+      doordeckSDK.libSodium.base64_variants.URLSAFE_NO_PADDING,
+  )
   const message = sHeader + '.' + sPayload
   // noinspection JSUnresolvedVariable,JSUnresolvedFunction
   const signature = doordeckSDK.libSodium.crypto_sign_detached(message, privateKey)
   // noinspection JSUnresolvedVariable,JSUnresolvedFunction
-  return message + '.' + doordeckSDK.libSodium.to_base64(signature, doordeckSDK.libSodium.base64_variants.ORIGINAL)
+  return message + '.' + doordeckSDK.libSodium.to_base64(
+      signature,
+      doordeckSDK.libSodium.base64_variants.URLSAFE_NO_PADDING,
+  )
 };
 
 const executor = function (baseUrl, deviceId, operation) {
