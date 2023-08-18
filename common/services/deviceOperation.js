@@ -55,7 +55,7 @@ const _executor = function (baseUrl, deviceId, operation) {
       {
         headers: {
           Authorization: "Bearer " + localStorage.token,
-          "Content-Type": "application/json",
+          "Content-Type": "application/jwt",
         },
         transformRequest: [
           (data) => data // Somehow this has to be like that, otherwise the default transformation does its own job
