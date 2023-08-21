@@ -94,5 +94,6 @@ export default {
       })
     })
   },
-  retrieveSavedCert
+  retrieveSavedCert,
+  deleteCert
 }
