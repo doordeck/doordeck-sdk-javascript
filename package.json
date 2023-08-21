@@ -1,7 +1,7 @@
 {
   "name": "@doordeck/javascript-doordeck-sdk",
   "title": "Javascript Doordeck Sdk",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Javascript wrapper for the Doordeck SDK.",
   "main": "index.js",
   "author": {
@@ -11,10 +11,13 @@
   "bugs": {
     "url": "https://github.com/doordeck/doordeck-sdk-javascript/issues"
   },
-  "bundleDependencies": false,
+  "bundleDependencies": [],
   "dependencies": {
     "axios": "^0.21",
+    "elliptic": "^6.5.4",
+    "idb": "^7.1.1",
     "jsrsasign": "^10.1",
+    "jwt-decode": "^3.1.2",
     "libsodium-wrappers": "^0.7"
   },
   "deprecated": false,
