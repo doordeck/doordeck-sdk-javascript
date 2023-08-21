@@ -29,6 +29,11 @@ export async function del(key) {
 }
 
 export async function deleteDatabase() {
+    // Get the DB
+    const db = await dbPromise;
+    // Close all the connections first
+    db.close();
+    // Then delete the DB.
     return await deleteDB(databaseName);
 }
 
