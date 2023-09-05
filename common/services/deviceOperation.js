@@ -64,6 +64,16 @@ const _executor = function (baseUrl, deviceId, operation) {
       }
   );
 };
+const _getDoordeckUserByEmail = function (baseUrl, userEmail, visitor) {
+  return axios.post(baseUrl + '/share/invite/' + userEmail + '?visitor=' + visitor, null, {
+    headers: {
+      'Authorization': 'Bearer ' + localStorage.token,
+      'Content-Type': 'application/json'
+    }
+  }).then(response => {
+    return response
+  })
+}
 const _getUserByEmail = function (baseUrl, userEmail) {
   return axios
       .post(baseUrl + "/share/invite/" + userEmail, null, {
@@ -141,6 +151,25 @@ export default {
           response.data = { user: response.data, email: user };
           return response;
         });
+      }
+    }
+  },
+  getDoordeckUser (baseUrl, user, visitor) {
+    var emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    if (emailRegex.test(user)) {
+      return _getDoordeckUserByEmail(baseUrl, user, visitor).then(response => {
+        var data = {'user': response.data, 'email': user}
+        response.data = data
+        return response
+      })
+    } else {
+      var uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+      if (uuidRegex.test(user)) {
+        return _getUserById(baseUrl, user).then(response => {
+          var data = {'user': response.data, 'email': user}
+          response.data = data
+          return response
+        })
       }
     }
   },
