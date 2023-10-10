@@ -217,6 +217,7 @@ export default {
       skipAuthorization: true,
       headers: {
         Authorization: "Bearer " + localStorage.token,
+        Accept: "application/vnd.doordeck.api-v3+json"
       },
     });
   },
