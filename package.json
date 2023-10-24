@@ -13,12 +13,14 @@
   },
   "bundleDependencies": [],
   "dependencies": {
+    "asn1js": "^3.0.5",
     "axios": "^0.21",
     "elliptic": "^6.5.4",
     "idb": "^7.1.1",
     "jsrsasign": "^10.1",
     "jwt-decode": "^3.1.2",
-    "libsodium-wrappers": "^0.7"
+    "libsodium-wrappers": "^0.7",
+    "pkijs": "^3.0.15"
   },
   "deprecated": false,
   "homepage": "https://doordeck.com",

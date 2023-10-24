@@ -1,8 +1,44 @@
-import { AUTH_TOKEN, BASE_URL, CERT } from '../constants'
+import {AUTH_TOKEN, BASE_URL, CERT} from '../constants'
 
 import IDB from '../idb'
 import axios from 'axios'
 import doordeck from '../doordeck'
+import {Certificate} from "pkijs";
+import {fromBER} from "asn1js";
+
+/**
+ * @param certObject - our stored certificate
+ * @private
+ * We usually emit 1 month valid certificates. We'll check
+ * if this cert is expiring in less than a week. If so, we'll
+ * delete it, and we'll return @null to force a new certificate
+ */
+
+const _certAccordingToValidity = async function(certObject) {
+  let base64DerCertificate = certObject["certificateChain"][0];
+  const base64DerCertificateArrayBuffer = Uint8Array.from(atob(base64DerCertificate), c => c.charCodeAt(0)).buffer;
+
+  try {
+    const asn1 = fromBER(base64DerCertificateArrayBuffer);
+    const cert = new Certificate({ schema: asn1.result });
+
+    const endDate = cert.notAfter.value;
+    const currentDate = new Date();
+    const weekFromNow = new Date(currentDate);
+    weekFromNow.setDate(currentDate.getDate() + 7);
+
+    if (endDate < weekFromNow) {
+      // Delete cert, return null to force getting a new one.
+      await deleteCert();
+      return null;
+    } else {
+      return certObject;
+    }
+  } catch (error) {
+    // We don't care, there wasn't probably a proper cert here
+    return null;
+  }
+}
 
 const retrieveSavedCert = async function () {
   const email = localStorage.email;
@@ -10,7 +46,7 @@ const retrieveSavedCert = async function () {
   const cert = await IDB.get(email)
   if(cert) {
     localStorage[CERT] = JSON.stringify(cert)
-    return cert
+    return await _certAccordingToValidity(cert)
   }
   return null
 }
@@ -22,6 +58,7 @@ const storeCert = function (cert) {
 }
 
 const deleteCert = async function() {
+  localStorage.removeItem(CERT);
   await IDB.deleteDatabase();
 }
 
