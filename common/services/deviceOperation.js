@@ -236,6 +236,7 @@ export default {
           skipAuthorization: true,
           headers: {
             Authorization: "Bearer " + localStorage.token,
+            'Content-Type': 'application/json',
           },
         }
     );
