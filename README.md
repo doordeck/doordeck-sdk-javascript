@@ -15,8 +15,9 @@ import doordeckSdk from '@doordeck/javascript-doordeck-sdk'
 
 // Initialise the SDK with your AuthToken
 // 'AuthToken': Base64 encoded Ed25519 public key
+// 'BaseUrl' : Base URL for the Doordeck SDK. If 'null' then the production URL is going to be used.
 
-doordeckSdk.initDoordeck(authToken).then(response => {
+doordeckSdk.doordeckInit(authToken, baseUrl).then(response => {
 	// doordeck successfully initialised
 }, error => {
 	if (error.state === 'verify') {
