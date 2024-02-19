@@ -49,6 +49,11 @@ const retrieveSavedCert = async function () {
     }
     return null
 }
+
+const isCertSaved = function () {
+    return localStorage[CERT] !== null && localStorage[CERT] !== undefined
+}
+
 const storeCert = function (cert) {
     localStorage[CERT] = JSON.stringify(cert)
     // update cert in indexedDB
@@ -96,27 +101,32 @@ export default {
     getCertificate(ephemeralKey) {
         return new Promise(async function (resolve, reject) {
             const cert = await retrieveSavedCert()
-            if (cert == null && cert == undefined) {
+
+            if (cert) {
+                resolve({state: 'success', message: 'Doordeck SDK is loaded'})
+            } else {
                 registerCertificate(ephemeralKey.publicKey)
                     .then(response => {
                         storeCert(response.data)
                         resolve({state: 'success', message: 'Doordeck SDK is loaded'})
                     })
                     .catch(fail => {
-                        if (fail.response.status === 423) {
-                            if (localStorage.token !== null && localStorage.token !== undefined) {
-                                registerCertificate2FA(ephemeralKey.publicKey).then(response => {
+                        if (fail.response.status === 423 && localStorage.token) {
+                            registerCertificate2FA(ephemeralKey.publicKey)
+                                .then(response => {
                                     if (response.data.method !== undefined && response.data.method !== null) {
                                         reject({state: 'verify', method: response.data.method})
-                                    } else reject({state: 'error', message: 'Failed to send 2FA request'})
+                                    } else {
+                                        reject({state: 'verify', message: 'Failed to send 2FA request'})
+                                    }
                                 })
-                            }
+                                .catch(fail => {
+                                    reject({state: 'verify', message: 'Failed to send 2FA request'})
+                                })
                         } else {
-                            reject({state: 'error', message: 'Failed to get certificate'})
+                            reject({state: 'verify', message: 'Failed to get certificate'})
                         }
                     })
-            } else {
-                resolve({state: 'success', message: 'Doordeck SDK is loaded'})
             }
         })
     },
@@ -131,5 +141,6 @@ export default {
         })
     },
     retrieveSavedCert,
-    deleteCert
+    deleteCert,
+    isCertSaved
 }

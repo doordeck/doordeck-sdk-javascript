@@ -15,8 +15,9 @@ const isLoaded = async function (authToken) {
 const doordeckInit = function (authToken, baseUrl) {
     return new Promise(function (resolve, reject) {
         libSodium.ready.then(async function () {
-            if ((await isLoaded())) resolve({state: 'success', message: 'Doordeck is already initialised.'})
-            if (authToken !== null && authToken !== undefined) {
+            if ((await isLoaded())) {
+                resolve({state: 'success', message: 'Doordeck is already initialised.'})
+            } else if (authToken !== null && authToken !== undefined) {
                 storeBaseUrl(baseUrl)
                 storeAuthToken(authToken)
                 ephemaralKeyGenerator.generateKeys().then(keys => {
@@ -26,7 +27,9 @@ const doordeckInit = function (authToken, baseUrl) {
                         reject(fail)
                     })
                 })
-            } else reject({state: 'error', message: 'No Auth Token provided.'})
+            } else {
+                reject({state: 'error', message: 'No Auth Token provided.'})
+            }
         })
     })
 }
@@ -47,6 +50,13 @@ const getStoredAuthToken = function () {
     return localStorage[AUTH_TOKEN]
 }
 
+/**
+ * Checks if the certificate is saved.
+ * @returns {boolean} True if the certificate is saved, otherwise false.
+ */
+const isCertificateAvailable = function () {
+    return certificate.isCertSaved()
+}
 
 const verifyCode = function (code) {
     return certificate.verifyCode(code, ephemaralKeyGenerator.retrieveSavedKeys())
@@ -58,4 +68,5 @@ export default {
     device,
     libSodium,
     getBaseUrl,
+    isCertificateAvailable
 }
