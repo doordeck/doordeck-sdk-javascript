@@ -53,4 +53,4 @@ export async function deleteDatabase() {
     _dbPromise = null;
 }
 
-export default { get, set, keys, getAll, del, deleteDatabase }
+export default {get, set, keys, getAll, del, deleteDatabase}
