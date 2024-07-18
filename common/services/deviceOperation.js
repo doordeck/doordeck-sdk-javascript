@@ -26,6 +26,7 @@ const _signer = function (deviceId, operation) {
         nbf: tNow,
         iat: tNow,
         exp: tEnd,
+        jti: self.crypto.randomUUID(),
         operation: operation
     }
     // noinspection JSUnresolvedVariable,JSUnresolvedFunction
@@ -103,11 +104,10 @@ export default {
             locked: true,
         });
     },
-    unlock(deviceId, duration) {
+    unlock(deviceId) {
         return _executor(deviceId, {
             type: "MUTATE_LOCK",
             locked: false,
-            duration: duration,
         });
     },
     changeOpenHours(deviceId, settings) {
