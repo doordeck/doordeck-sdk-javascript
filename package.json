@@ -1,7 +1,7 @@
 {
   "name": "@doordeck/javascript-doordeck-sdk",
   "title": "Javascript Doordeck Sdk",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "Javascript wrapper for the Doordeck SDK.",
   "main": "index.js",
   "author": {
