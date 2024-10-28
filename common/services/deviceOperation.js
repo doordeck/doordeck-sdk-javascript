@@ -4,6 +4,7 @@ import axios from "axios";
 import {CERT} from "../constants";
 import ephemaralKeyGenerator from "./ephemeralKeyGenerator";
 import doordeck from "../doordeck";
+import certificate from "./certificate.js";
 
 const _signer = function (deviceId, operation) {
     // Retrieve the EdDSA private key from storage
@@ -48,22 +49,71 @@ const _signer = function (deviceId, operation) {
         doordeck.libSodium.base64_variants.URLSAFE_NO_PADDING,
     )
 };
-const _executor = function (deviceId, operation) {
-    const signature = _signer(deviceId, operation);
-    return axios.post(
-        doordeck.getBaseUrl() + "/device/" + deviceId + "/execute",
-        signature,
-        {
-            headers: {
-                Authorization: "Bearer " + localStorage.token,
-                "Content-Type": "application/jwt",
-            },
-            transformRequest: [
-                (data) => data // Somehow this has to be like that, otherwise the default transformation does its own job
-            ],
-            timeout: 10000
-        }
-    );
+/**
+ * Validates or registers a certificate using an ephemeral key.
+ * Checks if a saved, valid certificate and key exist; if not, generates
+ * a new key (if necessary) and registers a new certificate. Handles 2FA if required.
+ *
+ * @returns {Promise<boolean>} Resolves true if certificate is valid or newly registered
+ * @throws {Object} Verification error if 2FA is required
+ */
+const validateAndRegisterCertificate = async () => {
+    const validCert = await certificate.retrieveSavedCert();
+    if (validCert) return true;
+
+    let ephemeralKey = ephemaralKeyGenerator.retrieveSavedKeys();
+    if (!ephemeralKey) {
+        ephemeralKey = await ephemaralKeyGenerator.generateKeys();
+    }
+
+    return new Promise((resolve, reject) => {
+        certificate.getCertificate(ephemeralKey)
+            .then(response => {
+                if (response.state === 'success') {
+                    resolve(true);
+                }
+            })
+            .catch(error => {
+                if (error.state === 'verify') {
+                    reject(error);
+                } else {
+                    reject({ state: 'error', message: 'Failed to validate or register certificate' });
+                }
+            });
+    });
+};
+/**
+ * Executes an operation on a device after validating or registering the certificate.
+ *
+ * @param {string} deviceId - The ID of the device
+ * @param {string} operation - The operation to execute
+ * @returns {Promise} Axios response from the device execution request
+ * @throws {Object} Verification error if 2FA is required
+ */
+const _executor = async function (deviceId, operation) {
+    try {
+        // Validate or register the certificate before proceeding
+        await validateAndRegisterCertificate();
+
+        const signature = _signer(deviceId, operation);
+        return axios.post(
+            `${doordeck.getBaseUrl()}/device/${deviceId}/execute`,
+            signature,
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.token}`,
+                    "Content-Type": "application/jwt",
+                },
+                transformRequest: [
+                    (data) => data
+                ],
+                timeout: 10000,
+            }
+        );
+    } catch (error) {
+        // Handle errors from certificate validation or registration
+        return Promise.reject(error);
+    }
 };
 const _getUserByEmail = function (userEmail, visitor) {
     let url = doordeck.getBaseUrl() + "/share/invite/" + userEmail;
