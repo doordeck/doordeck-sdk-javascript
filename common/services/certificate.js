@@ -13,24 +13,26 @@ import {fromBER} from "asn1js";
  * if this cert is expiring in less than a week. If so, we'll
  * delete it, and we'll return @null to force a new certificate
  */
-const _certAccordingToValidity = async function (certObject) {
-    let base64DerCertificate = certObject["certificateChain"][0];
-    const base64DerCertificateArrayBuffer = Uint8Array.from(atob(base64DerCertificate), c => c.charCodeAt(0)).buffer;
-
+export const _certAccordingToValidity = async function (certObject) {
     try {
+        let base64DerCertificate = certObject["certificateChain"][0];
+        const base64DerCertificateArrayBuffer = Uint8Array.from(atob(base64DerCertificate), c => c.charCodeAt(0)).buffer;
         const asn1 = fromBER(base64DerCertificateArrayBuffer);
         const cert = new Certificate({schema: asn1.result});
-
         const endDate = cert.notAfter.value;
-        const currentDate = new Date();
-        const weekFromNow = new Date(currentDate);
-        weekFromNow.setDate(currentDate.getDate() + 7);
+        const now = new Date();
 
-        if (endDate < weekFromNow) {
+        // Calculate the date one week before the certificate's end date
+        let expiryThreshold = new Date(endDate);
+        expiryThreshold.setDate(expiryThreshold.getDate() - 7);
+
+        if (now >= expiryThreshold) {
+            // The certificate expires in less than a week
             // Delete cert, return null to force getting a new one.
             await deleteCert();
             return null;
         } else {
+            // The certificate is valid for more than a week
             return certObject;
         }
     } catch (error) {
@@ -141,6 +143,9 @@ export default {
         })
     },
     retrieveSavedCert,
+    registerCertificate,
+    registerCertificate2FA,
+    storeCert,
     deleteCert,
     isCertSaved
 }
