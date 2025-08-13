@@ -1,6 +1,6 @@
 # Doordeck Javascript SDK 
 
-## Archieved
+## Archived
 This project is no longer maintained, please switch to [the Doordeck headless SDK](https://www.npmjs.com/package/@doordeck/doordeck-headless-sdk).
 
 
